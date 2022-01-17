@@ -61,7 +61,7 @@
     },
     {
       "name":"-checkMultiSTL",
-      "--toolnm":"/Users/jinqiuchen/Library/Android/sdk/ndk-bundle/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-nm"
+      "--toolnm":"/Users/antonzhang/Library/Android/sdk/ndk-bundle/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-nm"
     },
     {
       "name":"-unusedResources",
@@ -81,7 +81,7 @@
     },
     {
       "name":"-unstrippedSo",
-      "--toolnm":"/Users/jinqiuchen/Library/Android/sdk/ndk-bundle/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-nm"
+      "--toolnm":"/Users/antonzhang/Library/Android/sdk/ndk-bundle/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-nm"
     }
   ]
 }
