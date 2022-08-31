@@ -211,7 +211,7 @@ public class TestHooksActivity extends Activity {
                         + Debug.getNativeHeapFreeSize());
 
         String output = getExternalCacheDir() + "/memory_hook.log";
-        MemoryHook.INSTANCE.dump(output, output);
+        MemoryHook.INSTANCE.dump(output, output + ".json");
     }
 
     public void threadTest(View view) {
@@ -220,8 +220,10 @@ public class TestHooksActivity extends Activity {
             new HandlerThread("Test").start();
         }
 
+        JNIObj.threadTest();
+
         try {
-            Thread.sleep(500);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

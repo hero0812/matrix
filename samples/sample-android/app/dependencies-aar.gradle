@@ -15,6 +15,8 @@ dependencies {
             "matrix-fd",
             "matrix-jectl",
             "matrix-backtrace",
+            "matrix-traffic",
+            "matrix-memory-canary",
     ]
 
     matrixModules.each { moduleName ->
@@ -25,6 +27,8 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:1.1.0"
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
+
+    implementation(project(':libkt'))
 
     // TODO
     apkCheckerDependency group: "com.tencent.matrix", name: "matrix-apk-canary", version: MATRIX_VERSION, changing: true

@@ -8,6 +8,24 @@
 extern "C" {
 #endif
 
+JNIEXPORT jboolean JNICALL Java_com_tencent_matrix_openglleak_hook_OpenGLHook_isEglContextAlive(
+        JNIEnv *env, jclass clazz, jlong egl_context);
+
+extern "C"
+JNIEXPORT jboolean JNICALL Java_com_tencent_matrix_openglleak_hook_OpenGLHook_isEglSurfaceAlive(
+        JNIEnv *env, jclass clazz, jlong egl_surface);
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_updateCurrActivity(JNIEnv *env, jobject thiz,
+                                                                      jstring activityInfo);
+
+JNIEXPORT void JNICALL Java_com_tencent_matrix_openglleak_hook_OpenGLHook_releaseNative
+        (JNIEnv *, jclass thiz, jlong);
+
+JNIEXPORT jstring JNICALL Java_com_tencent_matrix_openglleak_hook_OpenGLHook_dumpNativeStack
+        (JNIEnv *, jclass thiz, jlong);
+
 /*
 * Class:     com_tencent_matrix_openglleak_hook_OpenGLHook
 * Method:    init
@@ -104,6 +122,42 @@ JNIEXPORT jboolean JNICALL Java_com_tencent_matrix_openglleak_hook_OpenGLHook_ho
 JNIEXPORT jboolean JNICALL Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlGetError
         (JNIEnv *, jclass, jint);
 
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlTexImage2D(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlTexImage3D(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlBindTexture(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlBindBuffer(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlBindFramebuffer(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlBindRenderbuffer(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlBufferData(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_hookGlRenderbufferStorage(JNIEnv *env, jclass clazz, jint index);
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_tencent_matrix_openglleak_hook_OpenGLHook_getResidualQueueSize(JNIEnv *env, jobject clazz);
 
 #ifdef __cplusplus
 }

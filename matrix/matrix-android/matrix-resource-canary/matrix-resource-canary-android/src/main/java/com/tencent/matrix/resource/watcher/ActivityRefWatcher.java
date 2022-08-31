@@ -21,13 +21,17 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 
+import com.tencent.matrix.lifecycle.EmptyActivityLifecycleCallbacks;
 import com.tencent.matrix.report.FilePublisher;
 import com.tencent.matrix.resource.ResourcePlugin;
 import com.tencent.matrix.resource.analyzer.model.DestroyedActivityInfo;
 import com.tencent.matrix.resource.config.ResourceConfig;
 import com.tencent.matrix.resource.processor.AutoDumpProcessor;
 import com.tencent.matrix.resource.processor.BaseLeakProcessor;
+import com.tencent.matrix.resource.processor.ForkDumpProcessor;
+import com.tencent.matrix.resource.processor.LazyForkAnalyzeProcessor;
 import com.tencent.matrix.resource.processor.ManualDumpProcessor;
+import com.tencent.matrix.resource.processor.NativeForkAnalyzeProcessor;
 import com.tencent.matrix.resource.processor.NoDumpProcessor;
 import com.tencent.matrix.resource.processor.SilenceAnalyseProcessor;
 import com.tencent.matrix.resource.watcher.RetryableTaskExecutor.RetryableTask;
@@ -49,20 +53,20 @@ import java.util.concurrent.TimeUnit;
 public class ActivityRefWatcher extends FilePublisher implements Watcher {
     private static final String TAG = "Matrix.ActivityRefWatcher";
 
-    private static final int  CREATED_ACTIVITY_COUNT_THRESHOLD = 1;
-    private static final long FILE_CONFIG_EXPIRED_TIME_MILLIS  = TimeUnit.DAYS.toMillis(1);
+    private static final int CREATED_ACTIVITY_COUNT_THRESHOLD = 1;
+    private static final long FILE_CONFIG_EXPIRED_TIME_MILLIS = TimeUnit.DAYS.toMillis(1);
 
     private static final String ACTIVITY_REFKEY_PREFIX = "MATRIX_RESCANARY_REFKEY_";
 
     private final ResourcePlugin mResourcePlugin;
 
-    private final RetryableTaskExecutor             mDetectExecutor;
-    private final int                               mMaxRedetectTimes;
-    private final long                              mBgScanTimes;
-    private final long                              mFgScanTimes;
+    private final RetryableTaskExecutor mDetectExecutor;
+    private final int mMaxRedetectTimes;
+    private final long mBgScanTimes;
+    private final long mFgScanTimes;
 
-    private final HandlerThread                     mHandlerThread;
-    private final Handler                           mHandler;
+    private final HandlerThread mHandlerThread;
+    private final Handler mHandler;
 
     private final ConcurrentLinkedQueue<DestroyedActivityInfo> mDestroyedActivityInfos;
 
@@ -93,6 +97,12 @@ public class ActivityRefWatcher extends FilePublisher implements Watcher {
                     return new ManualDumpProcessor(watcher, watcher.getResourcePlugin().getConfig().getTargetActivity());
                 case SILENCE_ANALYSE:
                     return new SilenceAnalyseProcessor(watcher);
+                case FORK_DUMP:
+                    return new ForkDumpProcessor(watcher);
+                case FORK_ANALYSE:
+                    return new NativeForkAnalyzeProcessor(watcher);
+                case LAZY_FORK_ANALYZE:
+                    return new LazyForkAnalyzeProcessor(watcher);
                 case NO_DUMP:
                 default:
                     return new NoDumpProcessor(watcher);
@@ -134,7 +144,7 @@ public class ActivityRefWatcher extends FilePublisher implements Watcher {
         }
     }
 
-    private final Application.ActivityLifecycleCallbacks mRemovedActivityMonitor = new ActivityLifeCycleCallbacksAdapter() {
+    private final Application.ActivityLifecycleCallbacks mRemovedActivityMonitor = new EmptyActivityLifecycleCallbacks() {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
@@ -240,8 +250,6 @@ public class ActivityRefWatcher extends FilePublisher implements Watcher {
 
 //            final WeakReference<Object[]> sentinelRef = new WeakReference<>(new Object[1024 * 1024]); // alloc big object
             triggerGc();
-            triggerGc();
-            triggerGc();
 //            if (sentinelRef.get() != null) {
 //                // System ignored our gc request, we will retry later.
 //                MatrixLog.d(TAG, "system ignore our gc request, wait for next detection.");
@@ -286,14 +294,12 @@ public class ActivityRefWatcher extends FilePublisher implements Watcher {
                     throw new NullPointerException("LeakProcessor not found!!!");
                 }
 
-                triggerGc();
                 if (mLeakProcessor.process(destroyedActivityInfo)) {
                     MatrixLog.i(TAG, "the leaked activity [%s] with key [%s] has been processed. stop polling", destroyedActivityInfo.mActivityName, destroyedActivityInfo.mKey);
                     infoIt.remove();
                 }
             }
 
-            triggerGc();
             return Status.RETRY;
         }
     };
@@ -310,7 +316,16 @@ public class ActivityRefWatcher extends FilePublisher implements Watcher {
         return mDestroyedActivityInfos;
     }
 
+    private long lastTriggeredTime = 0;
+
     public void triggerGc() {
+        long current = System.currentTimeMillis();
+        if (mDumpHprofMode == ResourceConfig.DumpMode.NO_DUMP
+                && current - lastTriggeredTime < getResourcePlugin().getConfig().getScanIntervalMillis() / 2 - 100) {
+            MatrixLog.v(TAG, "skip triggering gc for frequency");
+            return;
+        }
+        lastTriggeredTime = current;
         MatrixLog.v(TAG, "triggering gc...");
         Runtime.getRuntime().gc();
         try {

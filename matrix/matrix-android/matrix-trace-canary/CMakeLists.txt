@@ -10,6 +10,7 @@ add_library(trace-canary
         src/main/cpp/SignalHandler.cc
         src/main/cpp/Support.cc
         src/main/cpp/AnrDumper.cc
+        src/main/cpp/TouchEventTracer.cc
         src/main/cpp/nativehelper/managed_jnienv.cc
              )
 
@@ -23,7 +24,8 @@ find_library( log-lib
 target_link_libraries( trace-canary
         PRIVATE ${log-lib}
         PRIVATE ${EXT_DEP}/lib/${ANDROID_ABI}/libxhook.a
-                    )
+        PRIVATE ${EXT_DEP}/lib/${ANDROID_ABI}/libsemi_dlfcn.a
+        )
 
 set_target_properties(trace-canary PROPERTIES
         CXX_STANDARD_REQUIRED ON

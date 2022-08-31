@@ -7,10 +7,11 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES20;
 import android.os.Build;
-
 import androidx.annotation.RequiresApi;
 
 public class EGLHelper {
+
+    private static final String TAG = "MicroMsg.EGLHelper";
 
     private static EGLDisplay mEGLDisplay;
     private static EGLConfig mEglConfig;
@@ -34,7 +35,6 @@ public class EGLHelper {
                 EGL14.EGL_RED_SIZE, 8,
                 EGL14.EGL_GREEN_SIZE, 8,
                 EGL14.EGL_BLUE_SIZE, 8,
-                EGL14.EGL_ALPHA_SIZE, 8,
                 EGL14.EGL_NONE
         };
         int[] numEglConfigs = new int[1];
